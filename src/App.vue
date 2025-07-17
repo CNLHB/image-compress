@@ -39,7 +39,7 @@
       </section>
 
       <!-- 控制区域 -->
-      <section class="control-section bg-white p-6 rounded-xl shadow-sm">
+      <section v-if='uploadedImages.length > 0' class="control-section bg-white p-6 rounded-xl shadow-sm">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
           <h2 class="text-2xl font-bold text-gray-800">压缩设置</h2>
           <div class="flex gap-3">
@@ -70,7 +70,26 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="form-group">
             <label for="quality" class="block text-sm font-medium text-gray-700 mb-2">压缩质量</label>
-            <div class="flex items-center gap-3">
+             <div class="">
+    <div class="relative mx-auto flex max-w-2/3 items-center justify-between">
+      <div class="absolute z-0 h-2 w-full rounded-full bg-gray-200">
+        <div
+          :style="{ width: `${(current / (steps.length - 1)) * 100}%` }"
+          class="absolute top-0 bottom-0 left-0 h-full rounded-full bg-blue-500 transition-all duration-300 ease-in-out"></div>
+      </div>
+      <div
+        v-for="item in steps"
+        :key="item"
+        @click='update(item)'
+        :class="[
+          'z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all duration-500 ease-in-out',
+          item.id == current ? 'bg-blue-500 text-white' : 'bg-white',
+        ]">
+        {{ item.name }}
+      </div>
+    </div>
+  </div>
+            <!-- <div class="flex items-center gap-3">
               <input
                 type="range"
                 id="quality"
@@ -82,7 +101,7 @@
                 :disabled="isCompressing"
               />
               <span class="text-gray-700 font-medium min-w-[40px] text-center">{{ compressionQuality.toFixed(1) }}</span>
-            </div>
+            </div> -->
           </div>
 
           <div class="form-group">
@@ -214,7 +233,6 @@
 
 <script setup lang="ts">
 // @ts-nocheck
-
 import { ref, reactive, computed, onMounted } from 'vue';
 import { compressImage, batchCompressImages } from './js/compressor';
 import {
@@ -227,7 +245,18 @@ import {
   zipAndDownloadImages
 } from './js/utils';
 import { showNotification } from './js/utils';
+const current = ref("slight")
 
+const steps = ref([
+  { id: "slight", name: '轻度' },
+  { id: "normal", name: '普通' },
+  { id: "strong", name: '强力'},
+  { id: "extreme", name: '极强'},
+])
+
+const update = (type) => {
+  current.value = type.id
+}
 // 文件输入元素引用
 const fileInput = ref<HTMLInputElement | null>(null);
 
@@ -313,10 +342,10 @@ const processFiles = async (files: File[]) => {
     }
 
     // 验证文件大小
-    if (!validateFileSize(file, 5)) {
-      showNotification(`文件 ${file.name} 大小超过5MB限制，无法上传`, 'error');
-      continue;
-    }
+    // if (!validateFileSize(file, 5)) {
+    //   showNotification(`文件 ${file.name} 大小超过5MB限制，无法上传`, 'error');
+    //   continue;
+    // }
 
     // 创建图片预览
     const reader = new FileReader();
@@ -360,7 +389,7 @@ const startCompression = async () => {
     // 批量压缩图片
     const compressedFiles = await batchCompressImages(
       filesToCompress,
-      compressionQuality.value,
+      current.value,
       outputFormat.value,
       (current, total) => {
         currentProgress.value = current;
@@ -392,7 +421,7 @@ const startCompression = async () => {
     console.error('压缩过程出错:', error);
     // 在实际应用中，这里可以更精确地定位出错的图片
     if (error instanceof Error) {
-      alert(`压缩失败: \${error.message}`);
+      showNotification(`压缩出错: ${error.message}`, 'error');
     }
   } finally {
     isCompressing.value = false;

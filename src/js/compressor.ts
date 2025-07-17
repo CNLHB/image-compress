@@ -1,6 +1,42 @@
 // @ts-nocheck
 import imageCompression from "browser-image-compression";
-
+import  init, { compress_image } from './pkg/wasm_image_compress.js';
+import { compressImageJpeg } from "./custom/index.js";
+import { compressImagePng } from "./custom/pngCompress";
+import { compressImageWebm } from "./custom/webmCompress.js";
+let compressMap = {
+  png: compressImagePng,
+  jpg: compressImageJpeg,
+  jpeg: compressImageJpeg,
+  webp: compressImageWebm
+}
+async  function handleImageUpload(file, quality) {
+  
+  const type = file.type.split("/")[1]
+  if(!compressMap[type]){
+    new Error('无法处理这种图片格式')
+  }
+  const result = await compressMap[type]({
+    file,
+    level: quality,
+  })
+  if(result.type === 'finished'){
+    return result.blob
+  }
+  return result.message
+  // await init();
+  // return new Promise(async (resolve, reject) => { 
+  // const reader = new FileReader();
+  // reader.onload = async (e) => {
+  //   const data = new Uint8Array(e.target.result);
+  //   const compressed = await compress_image(data,new Uint8Array(quality), file.type.split("/")[1]); // 质量参数 0-100
+  //   const blob = new Blob([compressed], { type: file.type });
+  //   // 显示或上传压缩后的图片
+  //   resolve(blob);
+  // };
+  // reader.readAsArrayBuffer(file);
+  // });
+}
 /**
  * 压缩单张图片
  * @param {File} file - 原始图片文件
@@ -20,7 +56,9 @@ const compressImage = async (file, quality, format) => {
 
   try {
     // 使用browser-image-compression库进行压缩
-    const compressedFile = await imageCompression(file, options);
+    const compressedFile = await handleImageUpload(file, quality);
+    console.log('compressedFile', compressedFile);
+    
     return compressedFile;
   } catch (error) {
     console.error("图片压缩失败:", error);
