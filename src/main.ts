@@ -1,6 +1,7 @@
 import { createApp } from "vue";
 import "./css/style.css";
 import App from "./App.vue";
+// import LazyApp from "./LazyApp.vue";
 
 // 创建并挂载Vue应用
 const mountApp = () => {

@@ -69,39 +69,21 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="form-group">
-            <label for="quality" class="block text-sm font-medium text-gray-700 mb-2">压缩质量</label>
              <div class="">
-    <div class="relative mx-auto flex max-w-2/3 items-center justify-between">
-      <div class="absolute z-0 h-2 w-full rounded-full bg-gray-200">
-        <div
-          :style="{ width: `${(current / (steps.length - 1)) * 100}%` }"
-          class="absolute top-0 bottom-0 left-0 h-full rounded-full bg-blue-500 transition-all duration-300 ease-in-out"></div>
-      </div>
+    <div class="relative mx-auto flex max-w-2/3 items-center">
+      <label for="quality" class=" flex h-8 w-20 items-center text-sm font-medium text-gray-700 mr-4">压缩质量:</label>
       <div
         v-for="item in steps"
         :key="item"
         @click='update(item)'
         :class="[
-          'z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all duration-500 ease-in-out',
+          'z-10 flex h-8 w-18 items-center justify-center transition-all duration-500 ease-in-out cursor-pointer',
           item.id == current ? 'bg-blue-500 text-white' : 'bg-white',
         ]">
         {{ item.name }}
       </div>
     </div>
   </div>
-            <!-- <div class="flex items-center gap-3">
-              <input
-                type="range"
-                id="quality"
-                min="0.1"
-                max="1"
-                step="0.1"
-                v-model.number="compressionQuality"
-                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                :disabled="isCompressing"
-              />
-              <span class="text-gray-700 font-medium min-w-[40px] text-center">{{ compressionQuality.toFixed(1) }}</span>
-            </div> -->
           </div>
 
           <div class="form-group">
